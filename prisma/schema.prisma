@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+model Usuario {
+  id Int @id @default(autoincrement())
+  nombre String
+  apellido String
+  email String @unique
+  numero Int
+  ProductosVender ProductoVender[]
+  ProductosComprados ProductoComprado[]
+  Comentarios Comentario[]
+  rol String @default("Usuario")
+}
+
+model ProductoVender {
+  id Int @id @default(autoincrement())
+  nombreServicio String
+  fecha DateTime @default(now())
+  ProductoComprado ProductoComprado[]
+  idUsuarioVendedor Int
+  UsuarioVendedor Usuario @relation(fields: [idUsuarioVendedor], references: [id])
+}
+
+model ProductoComprado {
+  id Int @id @default(autoincrement())
+  idProductoVender Int
+  ProductoVender ProductoVender @relation(fields: [idProductoVender], references: [id])
+  idUsuario Int 
+  Usuario Usuario @relation(fields: [idUsuario], references: [id])
+  fecha DateTime @default(now())
+  Comentarios Comentario[]
+}
+
+model Comentario {
+  id Int @id @default(autoincrement())
+  contenido String
+  fecha DateTime @default(now())
+  calificacion Int 
+  idUsuario Int
+  Usuario Usuario @relation(fields: [idUsuario], references: [id])
+  idProductoComprado Int
+  ProductoComprado ProductoComprado @relation(fields: [idProductoComprado], references: [id])
+}
