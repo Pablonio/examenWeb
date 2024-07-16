@@ -3,7 +3,6 @@ import {db} from "../../../lib/lib";
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Obtener todos los productos
     if (req.method === 'GET') {
         try {
             const productos = await db.productoVender.findMany();

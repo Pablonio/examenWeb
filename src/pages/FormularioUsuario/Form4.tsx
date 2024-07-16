@@ -1,15 +1,44 @@
+import axios from "axios";
 import React, { useState } from "react";
+import Cookies from "js-cookie";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+
+interface FormData {
+  contenido: string;
+  calificacion: number;
+}
 
 export default function Form4() {
-  const [formData4, setFormData4] = useState({
+  const [formData4, setFormData4] = useState<FormData>({
     contenido: "",
     calificacion: 0,
   });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmitFormComentario = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitFormComentario = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData4);
-  }
+
+    const id = Cookies.get('id') as string;
+    const idUsuario = parseInt(id, 10);
+    const idProductoComprado = Cookies.get('idProductoComprado') as string;
+    const idProductoCompradoParse = parseInt(idProductoComprado, 10);
+
+    try {
+      const response = await axios.post('/api/comentarios/registrar', {
+        contenido: formData4.contenido,
+        calificacion: formData4.calificacion,
+        idUsuario: idUsuario,
+        idProductoComprado: idProductoCompradoParse,
+      });
+      console.log("Comentario registrado:", response.data);
+      setFormData4({ contenido: "", calificacion: 0 });
+    } catch (error) {
+      console.error("Error al registrar comentario:", error);
+      setError("Error al registrar comentario. Por favor, intenta de nuevo.");
+    }
+  };
 
   const handleRatingChange = (newRating: number) => {
     setFormData4({ ...formData4, calificacion: newRating });
@@ -19,22 +48,12 @@ export default function Form4() {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <svg
+        <FontAwesomeIcon
           key={i}
+          icon={solidStar}
           onClick={() => handleRatingChange(i)}
-          xmlns="http://www.w3.org/2000/svg"
-          fill={i <= formData4.calificacion ? "yellow" : "none"}
-          viewBox="0 0 24 24"
-          stroke="currentColor"
           className={`h-6 w-6 cursor-pointer ${i <= formData4.calificacion ? "text-yellow-500" : "text-gray-300"}`}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l2.134 6.57a1 1 0 00.95.69h6.905c.969 0 1.371 1.24.588 1.81l-5.593 4.06a1 1 0 00-.364 1.118l2.133 6.57c.3.921-.755 1.688-1.54 1.118l-5.593-4.06a1 1 0 00-1.176 0l-5.593 4.06c-.784.57-1.84-.197-1.54-1.118l2.133-6.57a1 1 0 00-.364-1.118L2.056 12.6c-.784-.57-.38-1.81.588-1.81h6.905a1 1 0 00.95-.69l2.134-6.57z"
-          />
-        </svg>
+        />
       );
     }
     return stars;
@@ -70,6 +89,8 @@ export default function Form4() {
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4"
         />
       </form>
+      {message && <p className="text-green-500 mt-2">{message}</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 }
