@@ -5,6 +5,7 @@ CREATE TABLE "Usuario" (
     "apellido" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "numero" INTEGER NOT NULL,
+    "rol" TEXT NOT NULL DEFAULT 'Usuario',
 
     CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
 );
@@ -14,7 +15,9 @@ CREATE TABLE "ProductoVender" (
     "id" SERIAL NOT NULL,
     "nombreServicio" TEXT NOT NULL,
     "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "precio" INTEGER NOT NULL,
     "idUsuarioVendedor" INTEGER NOT NULL,
+    "imagenes" TEXT[],
 
     CONSTRAINT "ProductoVender_pkey" PRIMARY KEY ("id")
 );
@@ -24,7 +27,7 @@ CREATE TABLE "ProductoComprado" (
     "id" SERIAL NOT NULL,
     "idProductoVender" INTEGER NOT NULL,
     "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "calificacion" INTEGER NOT NULL,
+    "idUsuario" INTEGER NOT NULL,
 
     CONSTRAINT "ProductoComprado_pkey" PRIMARY KEY ("id")
 );
@@ -36,6 +39,7 @@ CREATE TABLE "Comentario" (
     "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "idUsuario" INTEGER NOT NULL,
     "idProductoComprado" INTEGER NOT NULL,
+    "calificacion" INTEGER NOT NULL,
 
     CONSTRAINT "Comentario_pkey" PRIMARY KEY ("id")
 );
@@ -50,7 +54,10 @@ ALTER TABLE "ProductoVender" ADD CONSTRAINT "ProductoVender_idUsuarioVendedor_fk
 ALTER TABLE "ProductoComprado" ADD CONSTRAINT "ProductoComprado_idProductoVender_fkey" FOREIGN KEY ("idProductoVender") REFERENCES "ProductoVender"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comentario" ADD CONSTRAINT "Comentario_idUsuario_fkey" FOREIGN KEY ("idUsuario") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ProductoComprado" ADD CONSTRAINT "ProductoComprado_idUsuario_fkey" FOREIGN KEY ("idUsuario") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comentario" ADD CONSTRAINT "Comentario_idProductoComprado_fkey" FOREIGN KEY ("idProductoComprado") REFERENCES "ProductoComprado"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Comentario" ADD CONSTRAINT "Comentario_idUsuario_fkey" FOREIGN KEY ("idUsuario") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

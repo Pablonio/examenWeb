@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,45 +8,47 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
 model Usuario {
-  id Int @id @default(autoincrement())
-  nombre String
-  apellido String
-  email String @unique
-  numero Int
-  ProductosVender ProductoVender[]
+  id                 Int                @id @default(autoincrement())
+  nombre             String
+  apellido           String
+  email              String             @unique
+  numero             Int
+  rol                String             @default("Usuario")
+  Comentarios        Comentario[]
   ProductosComprados ProductoComprado[]
-  Comentarios Comentario[]
-  rol String @default("Usuario")
+  ProductosVender    ProductoVender[]
 }
 
 model ProductoVender {
-  id Int @id @default(autoincrement())
-  nombreServicio String
-  fecha DateTime @default(now())
-  ProductoComprado ProductoComprado[]
+  id                Int                @id @default(autoincrement())
+  nombreServicio    String
+  fecha             DateTime           @default(now())
+  precio            Int
   idUsuarioVendedor Int
-  UsuarioVendedor Usuario @relation(fields: [idUsuarioVendedor], references: [id])
+  imagenes          String[]           
+  ProductoComprado  ProductoComprado[]
+  UsuarioVendedor   Usuario            @relation(fields: [idUsuarioVendedor], references: [id])
 }
 
+
 model ProductoComprado {
-  id Int @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   idProductoVender Int
-  ProductoVender ProductoVender @relation(fields: [idProductoVender], references: [id])
-  idUsuario Int 
-  Usuario Usuario @relation(fields: [idUsuario], references: [id])
-  fecha DateTime @default(now())
-  Comentarios Comentario[]
+  fecha            DateTime       @default(now())
+  idUsuario        Int
+  Comentarios      Comentario[]
+  ProductoVender   ProductoVender @relation(fields: [idProductoVender], references: [id])
+  Usuario          Usuario        @relation(fields: [idUsuario], references: [id])
 }
 
 model Comentario {
-  id Int @id @default(autoincrement())
-  contenido String
-  fecha DateTime @default(now())
-  calificacion Int 
-  idUsuario Int
-  Usuario Usuario @relation(fields: [idUsuario], references: [id])
+  id                 Int              @id @default(autoincrement())
+  contenido          String
+  fecha              DateTime         @default(now())
+  idUsuario          Int
   idProductoComprado Int
-  ProductoComprado ProductoComprado @relation(fields: [idProductoComprado], references: [id])
+  calificacion       Int
+  ProductoComprado   ProductoComprado @relation(fields: [idProductoComprado], references: [id])
+  Usuario            Usuario          @relation(fields: [idUsuario], references: [id])
 }
