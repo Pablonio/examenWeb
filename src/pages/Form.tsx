@@ -45,10 +45,11 @@ export default function Form() {
         try {
             const endpoint = isLogin ? '/api/usuario/login' : '/api/usuario/registrar';
             const res = await axios.post(endpoint, formDataToSend);
-
+            console.log(res.data);
             if (isLogin) {
                 Cookies.set('id', res.data.user.id);
                 Cookies.set('rol', res.data.user.rol);
+                Cookies.set('token', res.data.token);
                 console.log('Redirigiendo a:', res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
                 router.push(res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
             } else {

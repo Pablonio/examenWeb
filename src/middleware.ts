@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const token = cookies.token;
   const rol = cookies.rol as Roles;
 
-  if (!rol) {
+  if (!rol && !token) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
