@@ -26,22 +26,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     apellido: true,
                     email: true,
                     numero: true,
-                    rol: true,
-                    contrasena: true, 
+                    rol: true, // Incluye rol aquí
                 },
             });
 
             if (!user) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
-            const passwordMatch = await compare(contrasena, user.contrasena);
+
+            // Busca el usuario completo para acceder a la contraseña
+            const userWithPassword = await db.usuario.findUnique({
+                where: { email },
+                select: {
+                    contrasena: true,
+                },
+            });
+
+            // Verifica si userWithPassword es null
+            if (!userWithPassword) {
+                return res.status(401).json({ error: 'Credenciales inválidas' });
+            }
+
+            const passwordMatch = await compare(contrasena, userWithPassword.contrasena);
 
             if (!passwordMatch) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
+
             const token = sign({ userId: user.id, rol: user.rol }, JWT_SECRET, {
                 expiresIn: '1h',
             });
+
             res.status(200).json({
                 token,
                 user: {

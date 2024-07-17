@@ -19,29 +19,28 @@ export default function Form() {
 
     const handleSubmitFormUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+    
         if (!formData.email || !formData.contrasena) {
             toast.error("Email y contraseña son obligatorios.");
             return;
         }
         
-        if (!isLogin) {
-            if (!formData.nombre || !formData.apellido || !formData.numero || !formData.rol) {
-                toast.error("Todos los campos son obligatorios para el registro.");
-                return;
-            }
-
-            if (isNaN(Number(formData.numero))) {
-                toast.error("El número debe ser un valor numérico.");
-                return;
-            }
+        // Validación para registro
+        if (!isLogin && (!formData.nombre || !formData.apellido || !formData.numero || !formData.rol)) {
+            toast.error("Todos los campos son obligatorios para el registro.");
+            return;
         }
-
+    
+        if (isNaN(Number(formData.numero))) {
+            toast.error("El número debe ser un valor numérico.");
+            return;
+        }
+    
         const formDataToSend = {
             ...formData,
             numero: parseInt(formData.numero, 10),
         };
-
+    
         try {
             const endpoint = isLogin ? '/api/usuario/login' : '/api/usuario/registrar';
             const res = await axios.post(endpoint, formDataToSend);
@@ -50,15 +49,15 @@ export default function Form() {
                 Cookies.set('id', res.data.user.id);
                 Cookies.set('rol', res.data.user.rol);
                 Cookies.set('token', res.data.token);
-                console.log('Redirigiendo a:', res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
                 router.push(res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
             } else {
                 toast.success("Registro exitoso. Puedes iniciar sesión ahora.");
             }
         } catch (error) {
-            toast.error("se ha producido un error al " + (isLogin ? "iniciar sesión" : "registrar el usuario"));
+            toast.error("Se ha producido un error al " + (isLogin ? "iniciar sesión" : "registrar el usuario"));
         }
     };
+    
 
     return (
         <div className="bg-gray-100 dark:bg-gray-800 h-auto w-96 flex items-center justify-center p-6">
