@@ -10,7 +10,9 @@ export default function Form() {
         email: "",
         numero: "",
         rol: "Usuario",
+        password: "",
     });
+    const [isLogin, setIsLogin] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
@@ -25,19 +27,20 @@ export default function Form() {
         };
 
         try {
-            const res = await axios.post('/api/usuario/registrar', formDataToSend);
-            Cookies.set('id', res.data.id);
-            Cookies.set('rol', res.data.rol);
-            console.log('Redirigiendo a:', res.data.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
-            if (res &&res.data.rol === "Vendedor") {
-                router.push("/FormularioVendedor");
-            } else if (res && res.data.rol === "Usuario") {
-                router.push("/FormularioUsuario");
+            const endpoint = isLogin ? '/api/usuario/login' : '/api/usuario/registrar';
+            const res = await axios.post(endpoint, formDataToSend);
+
+            if (isLogin) {
+                Cookies.set('id', res.data.user.id);
+                Cookies.set('rol', res.data.user.rol);
+                console.log('Redirigiendo a:', res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
+                router.push(res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
             } else {
-                router.push("/");
+                setMessage("Registro exitoso. Puedes iniciar sesión ahora.");
+                setError("");
             }
         } catch (error) {
-            setError("Hubo un problema al registrar el usuario.");
+            setError(isLogin ? "Hubo un problema al iniciar sesión." : "Hubo un problema al registrar el usuario.");
             setMessage("");
         }
     };
@@ -48,35 +51,40 @@ export default function Form() {
                 method="post"
                 onSubmit={handleSubmitFormUser}
                 className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg">
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="nombre">
-                        Nombre
-                    </label>
-                    <input
-                        type="text"
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        id="nombre"
-                        required
-                    />
-                </div>
+                
+                {!isLogin && (
+                    <>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="nombre">
+                                Nombre
+                            </label>
+                            <input
+                                type="text"
+                                name="nombre"
+                                value={formData.nombre}
+                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                id="nombre"
+                                required
+                            />
+                        </div>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="apellido">
-                        Apellido
-                    </label>
-                    <input
-                        type="text"
-                        name="apellido"
-                        value={formData.apellido}
-                        onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                        className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        id="apellido"
-                        required
-                    />
-                </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="apellido">
+                                Apellido
+                            </label>
+                            <input
+                                type="text"
+                                name="apellido"
+                                value={formData.apellido}
+                                onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                id="apellido"
+                                required
+                            />
+                        </div>
+                    </>
+                )}
 
                 <div className="mb-4">
                     <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="email">
@@ -108,29 +116,50 @@ export default function Form() {
                     />
                 </div>
 
+                {!isLogin && (
+                    <div className="mb-4">
+                        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="rol">
+                            Selecciona el rol
+                        </label>
+                        <select
+                            name="rol"
+                            value={formData.rol}
+                            onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            id="rol"
+                        >
+                            <option value="Usuario">Usuario</option>
+                            <option value="Vendedor">Vendedor</option>
+                        </select>
+                    </div>
+                )}
+
                 <div className="mb-4">
-                    <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="rol">
-                        Selecciona el rol
+                    <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="password">
+                        Contraseña
                     </label>
-                    <select
-                        name="rol"
-                        value={formData.rol}
-                        onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        id="rol"
-                    >
-                        <option value="Usuario">Usuario</option>
-                        <option value="Vendedor">Vendedor</option>
-                    </select>
+                        id="password"
+                        required
+                    />
                 </div>
 
                 <div className="flex items-center justify-between">
                     <input
                         type="submit"
-                        value="Enviar"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        value={isLogin ? "Iniciar Sesión" : "Registrar"}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none"
                     />
                 </div>
+
+                <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-blue-500 mt-4">
+                    {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+                </button>
 
                 {message && <p className="text-green-500 mt-4">{message}</p>}
                 {error && <p className="text-red-500 mt-4">{error}</p>}

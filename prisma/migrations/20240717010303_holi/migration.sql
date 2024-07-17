@@ -5,6 +5,7 @@ CREATE TABLE "Usuario" (
     "apellido" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "numero" INTEGER NOT NULL,
+    "contrasena" TEXT NOT NULL,
     "rol" TEXT NOT NULL DEFAULT 'Usuario',
 
     CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
@@ -17,7 +18,7 @@ CREATE TABLE "ProductoVender" (
     "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "precio" INTEGER NOT NULL,
     "idUsuarioVendedor" INTEGER NOT NULL,
-    "imagenes" TEXT[],
+    "imagenes" TEXT NOT NULL,
 
     CONSTRAINT "ProductoVender_pkey" PRIMARY KEY ("id")
 );

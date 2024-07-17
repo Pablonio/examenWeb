@@ -41,9 +41,9 @@ export default function Form2() {
         try {
           const res = await axios.post("/api/producto/registrar", {
             nombreServicio: formData.nombreServicio,
-            precio, // Enviar precio como número
+            precio, 
             idUsuarioVendedor,
-            imagenes: imagenUrl, // Enviar como cadena
+            imagenes: imagenUrl, 
           });
           setMessage("Producto registrado exitosamente!");
           console.log(res.data);

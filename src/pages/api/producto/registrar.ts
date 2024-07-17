@@ -13,9 +13,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const producto = await db.productoVender.create({
         data: {
           nombreServicio,
-          precio: parseInt(precio, 10), // Convertir precio a número
+          precio: parseInt(precio, 10), 
           idUsuarioVendedor,
-          imagenes, // Enviar como cadena
+          imagenes, 
         },
       });
       return res.status(201).json(producto);
