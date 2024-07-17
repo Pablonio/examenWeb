@@ -32,7 +32,7 @@ export default function Form4() {
         idUsuario: idUsuario,
         idProductoComprado: idProductoCompradoParse,
       });
-      console.log("Comentario registrado:", response.data);
+      setMessage("Comentario registrado exitosamente!");
       setFormData4({ contenido: "", calificacion: 0 });
     } catch (error) {
       console.error("Error al registrar comentario:", error);
@@ -61,13 +61,12 @@ export default function Form4() {
 
   return (
     <div className="w-full max-w-lg mt-6">
-      <h2 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">Registra un comentario</h2>
       <form
         method="post"
         onSubmit={handleSubmitFormComentario}
         className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full"
       >
-        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="nombre">
+        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="contenido">
           Realiza un comentario
         </label>
         <input

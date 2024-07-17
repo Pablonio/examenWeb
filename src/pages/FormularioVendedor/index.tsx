@@ -5,7 +5,7 @@ import axios from "axios";
 interface FormData {
   nombreServicio: string;
   precio: string;
-  imagenes: FileList | null;
+  imagenes: File | null;
 }
 
 export default function Form2() {
@@ -21,40 +21,39 @@ export default function Form2() {
     if (e.target.files) {
       setFormData({
         ...formData,
-        imagenes: e.target.files,
+        imagenes: e.target.files[0], // Solo la primera imagen
       });
     }
   };
 
-  const handleSubmitFormProducto = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmitFormProducto = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const id = Cookies.get("id") as string;
     const idUsuarioVendedor = parseInt(id, 10);
-
-    const formDataToSend = new FormData();
-    formDataToSend.append("nombreServicio", formData.nombreServicio);
-    formDataToSend.append("precio", formData.precio);
-    formDataToSend.append("idUsuarioVendedor", idUsuarioVendedor.toString());
+    const precio = parseInt(formData.precio, 10); // Convertir precio a entero
 
     if (formData.imagenes) {
-      for (let i = 0; i < formData.imagenes.length; i++) {
-        formDataToSend.append("imagenes", formData.imagenes[i]);
-      }
-    }
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const imagenUrl = reader.result as string; // URL de la imagen
 
-    console.log("Formulario enviado:", formDataToSend); // Verifica qué datos se están enviando
-
-    try {
-      const res = await axios.post("/api/producto/registrar", formDataToSend);
-      setMessage("Producto registrado exitosamente!");
-      console.log(res.data);
-    } catch (error) {
-      console.error('Error en la solicitud:', error);
-      setError("Hubo un problema al registrar el producto.");
-      setMessage("");
+        try {
+          const res = await axios.post("/api/producto/registrar", {
+            nombreServicio: formData.nombreServicio,
+            precio, // Enviar precio como número
+            idUsuarioVendedor,
+            imagenes: imagenUrl, // Enviar como cadena
+          });
+          setMessage("Producto registrado exitosamente!");
+          console.log(res.data);
+        } catch (error) {
+          console.error('Error en la solicitud:', error);
+          setError("Hubo un problema al registrar el producto.");
+          setMessage("");
+        }
+      };
+      reader.readAsDataURL(formData.imagenes); // Leer como URL base64
     }
   };
 
@@ -65,48 +64,34 @@ export default function Form2() {
         onSubmit={handleSubmitFormProducto}
         className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg"
       >
-        <label
-          className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-          htmlFor="nombre"
-        >
+        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="nombre">
           Nombre del producto
         </label>
         <input
           type="text"
           name="nombreServicio"
           value={formData.nombreServicio}
-          onChange={(e) =>
-            setFormData({ ...formData, nombreServicio: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, nombreServicio: e.target.value })}
           className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label
-          className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-          htmlFor="precio"
-        >
+        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="precio">
           Precio del producto
         </label>
         <input
           type="number"
           name="precio"
           value={formData.precio}
-          onChange={(e) =>
-            setFormData({ ...formData, precio: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
           className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <label
-          className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
-          htmlFor="imagenes"
-        >
-          Imágenes del producto
+        <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2" htmlFor="imagen">
+          Imagen del producto
         </label>
         <input
           type="file"
           accept="image/*"
-          multiple // Permite seleccionar múltiples archivos de imagen
           onChange={handleFileChange}
           className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />

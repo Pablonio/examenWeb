@@ -6,25 +6,31 @@ import Cookies from "js-cookie";
 interface Producto {
   id: number;
   nombreServicio: string;
+  imagenes: string; 
 }
 
-interface FormData {
-  producto: string;
+interface Comentario {
+  id: number;
+  contenido: string;
+  calificacion: number;
+  idUsuario: number;
+  idProductoComprado: number;
+  Usuario: {
+    nombre: string; // Cambia según el campo que uses en el modelo Usuario
+  };
 }
 
 export default function Form3() {
-  const [formData3, setFormData3] = useState<FormData>({
-    producto: "",
-  });
   const [productos, setProductos] = useState<Producto[]>([]);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [comentarios, setComentarios] = useState<Comentario[]>([]);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProductos = async () => {
       try {
         const response = await axios.get<Producto[]>("/api/producto/getProductos");
-        console.log(response.data);
         setProductos(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -37,21 +43,27 @@ export default function Form3() {
   const id = Cookies.get('id') as string;
   const idUsuario = parseInt(id, 10);
 
-  const handleSubmitFormCalificacionProductoComprado = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const idProductoVender = parseInt(formData3.producto, 10);
-
+  const handlePurchase = async (idProductoVender: number) => {
     try {
       const response = await axios.post('/api/producto/comprarProducto', {
-        idProductoVender: idProductoVender,
-        idUsuario: idUsuario,
+        idProductoVender,
+        idUsuario,
       });
       Cookies.set('idProductoComprado', response.data.id);
-
+      setSelectedProduct(productos.find(p => p.id === idProductoVender) || null);
+      setModalOpen(true); // Abrir modal al comprar
     } catch (error) {
       console.error(error);
-      setError("Error al enviar la calificación.");
+    }
+  };
+
+  const fetchComentarios = async (idProductoComprado: number) => {
+    try {
+      const response = await axios.get(`/api/comentarios/obtener?idProductoComprado=${idProductoComprado}`);
+      setComentarios(response.data);
+      setCommentModalOpen(true); // Abrir modal de comentarios
+    } catch (error) {
+      console.error("Error fetching comments:", error);
     }
   };
 
@@ -62,19 +74,61 @@ export default function Form3() {
         <div className="grid grid-cols-1 gap-4">
           {productos.map((producto) => (
             <div key={producto.id} className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg">
+              <img src={producto.imagenes} alt={producto.nombreServicio} className="w-full h-40 object-cover mb-4 rounded" />
               <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-2">{producto.nombreServicio}</h3>
               <button
-                onClick={() => setFormData3({ ...formData3, producto: producto.id.toString() })}
+                onClick={() => handlePurchase(producto.id)}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Comprar
+              </button>
+              <button
+                onClick={() => fetchComentarios(producto.id)}
+                className="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Ver Comentarios
               </button>
             </div>
           ))}
         </div>
       </div>
 
-      <Form4 />
+      {modalOpen && selectedProduct && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">Registra un comentario para {selectedProduct.nombreServicio}</h2>
+            <Form4 />
+            <button
+              onClick={() => setModalOpen(false)}
+              className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {commentModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4">Comentarios para {selectedProduct?.nombreServicio}</h2>
+            <div className="space-y-4">
+            {comentarios.map((comentario) => (
+                <div key={comentario.id} className="border-b pb-2">
+                    <p className="text-gray-700 dark:text-gray-300">{comentario.contenido}</p>
+                    <p className="text-gray-500 dark:text-gray-400">Calificación: {comentario.calificacion} - Usuario: {comentario.Usuario.nombre}</p>
+                </div>
+            ))}              
+            </div>
+            <button
+              onClick={() => setCommentModalOpen(false)}
+              className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
