@@ -11,7 +11,7 @@ export default function Form() {
         email: "",
         numero: "",
         rol: "Usuario",
-        password: "",
+        contrasena: "",
     });
     const [isLogin, setIsLogin] = useState(true);
 
@@ -20,8 +20,7 @@ export default function Form() {
     const handleSubmitFormUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Validations
-        if (!formData.email || !formData.password) {
+        if (!formData.email || !formData.contrasena) {
             toast.error("Email y contraseña son obligatorios.");
             return;
         }
@@ -156,8 +155,8 @@ export default function Form() {
                     <input
                         type="password"
                         name="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        value={formData.contrasena}
+                        onChange={(e) => setFormData({ ...formData, contrasena: e.target.value })}
                         className="w-full px-3 py-2 border rounded-lg text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         id="password"
                         required

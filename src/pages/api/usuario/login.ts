@@ -3,6 +3,16 @@ import { db } from '../../../lib/lib';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+interface Usuario {
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    numero: number;
+    rol: string;
+    contrasena: string;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         const { email, password } = req.body;
@@ -12,7 +22,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         try {
-            const user = await db.usuario.findUnique({ where: { email } });
+            const user: Usuario | null = await db.usuario.findUnique({
+                where: { email },
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    numero: true,
+                    rol: true,
+                    contrasena: true,
+                },
+            });
 
             if (!user) {
                 return res.status(401).json({ error: 'Usuario no encontrado' });
