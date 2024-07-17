@@ -1,36 +1,67 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 import { db } from '../../../lib/lib';
-import bcrypt from 'bcrypt';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ error: 'JWT_SECRET not defined' });
+    }
+
+    const JWT_SECRET = process.env.JWT_SECRET;
+
     if (req.method === 'POST') {
-        const { nombre, apellido, email, numero, rol, contrasena } = req.body;
+        const { email, contrasena } = req.body;
 
-        if (!nombre || !apellido || !email || !numero || !rol || !contrasena) {
-            return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+        if (!email || !contrasena) {
+            return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
         }
-
-        const contrasenaHash = await bcrypt.hash(contrasena, 10);
 
         try {
-            const user = await db.usuario.create({
-                data: {
-                    nombre,
-                    apellido,
-                    email,
-                    numero,
-                    rol,
-                    contrasena: contrasenaHash,
+            const user = await db.usuario.findUnique({
+                where: { email },
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    numero: true,
+                    rol: true,
+                    contrasena: true, 
                 },
             });
-            return res.status(201).json(user);
+
+            if (!user) {
+                return res.status(401).json({ error: 'Credenciales inválidas' });
+            }
+
+            const passwordMatch = await compare(contrasena, user.contrasena);
+
+            if (!passwordMatch) {
+                return res.status(401).json({ error: 'Credenciales inválidas' });
+            }
+
+            const token = sign({ userId: user.id, rol: user.rol }, JWT_SECRET, {
+                expiresIn: '1h',
+            });
+
+            res.status(200).json({
+                token,
+                user: {
+                    id: user.id,
+                    nombre: user.nombre,
+                    apellido: user.apellido,
+                    email: user.email,
+                    numero: user.numero,
+                    rol: user.rol,
+                },
+            });
         } catch (error) {
-            console.error('User creation failed:', error);
-            return res.status(500).json({ error: 'User creation failed. Please try again later.' });
+            console.error('Login failed:', error);
+            res.status(500).json({ error: 'Error en el inicio de sesión' });
         }
     } else {
-        return res.status(405).json({ error: 'Method not allowed' });
+        res.status(405).json({ error: 'Método no permitido' });
     }
 }
-
 

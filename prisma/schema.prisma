@@ -10,15 +10,15 @@ datasource db {
 
 model Usuario {
   id                 Int                @id @default(autoincrement())
+  email              String             @unique
+  contrasena         String
   nombre             String
   apellido           String
-  email              String             @unique
   numero             Int
   rol                String             @default("Usuario")
   Comentarios        Comentario[]
   ProductosComprados ProductoComprado[]
   ProductosVender    ProductoVender[]
-  contrasena         String
 }
 
 model ProductoVender {
