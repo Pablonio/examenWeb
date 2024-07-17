@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Cookies from "js-cookie";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as solidStar } from "@fortawesome/free-solid-svg-icons";
+import toast, { Toaster } from "react-hot-toast";
 
 interface FormData {
   contenido: string;
@@ -14,31 +15,39 @@ export default function Form4() {
     contenido: "",
     calificacion: 0,
   });
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmitFormComentario = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
+    if (!formData4.contenido) {
+      toast.error("El contenido del comentario es obligatorio.");
+      return;
+    }
+    if (formData4.calificacion === 0) {
+      toast.error("Por favor, selecciona una calificación.");
+      return;
+    }
+  
     const id = Cookies.get('id') as string;
     const idUsuario = parseInt(id, 10);
     const idProductoComprado = Cookies.get('idProductoComprado') as string;
     const idProductoCompradoParse = parseInt(idProductoComprado, 10);
-
+  
     try {
       const response = await axios.post('/api/comentarios/registrar', {
         contenido: formData4.contenido,
-        calificacion: formData4.calificacion,
+        calificacion: parseInt(formData4.calificacion.toString(), 10),
         idUsuario: idUsuario,
         idProductoComprado: idProductoCompradoParse,
       });
-      setMessage("Comentario registrado exitosamente!");
+      toast.success("Comentario registrado exitosamente!");
       setFormData4({ contenido: "", calificacion: 0 });
     } catch (error) {
       console.error("Error al registrar comentario:", error);
-      setError("Error al registrar comentario. Por favor, intenta de nuevo.");
+      toast.error("Error al registrar comentario. Por favor, intenta de nuevo.");
     }
   };
+  
 
   const handleRatingChange = (newRating: number) => {
     setFormData4({ ...formData4, calificacion: newRating });
@@ -88,8 +97,7 @@ export default function Form4() {
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4"
         />
       </form>
-      {message && <p className="text-green-500 mt-2">{message}</p>}
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+      <Toaster />
     </div>
   );
 }

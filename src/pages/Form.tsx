@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Form() {
     const [formData, setFormData] = useState({
@@ -12,14 +13,30 @@ export default function Form() {
         rol: "Usuario",
         password: "",
     });
-    const [isLogin, setIsLogin] = useState(false);
-    const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [isLogin, setIsLogin] = useState(true);
 
     const router = useRouter();
 
     const handleSubmitFormUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        // Validations
+        if (!formData.email || !formData.password) {
+            toast.error("Email y contraseña son obligatorios.");
+            return;
+        }
+        
+        if (!isLogin) {
+            if (!formData.nombre || !formData.apellido || !formData.numero || !formData.rol) {
+                toast.error("Todos los campos son obligatorios para el registro.");
+                return;
+            }
+
+            if (isNaN(Number(formData.numero))) {
+                toast.error("El número debe ser un valor numérico.");
+                return;
+            }
+        }
 
         const formDataToSend = {
             ...formData,
@@ -36,12 +53,10 @@ export default function Form() {
                 console.log('Redirigiendo a:', res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
                 router.push(res.data.user.rol === "Vendedor" ? "/FormularioVendedor" : "/FormularioUsuario");
             } else {
-                setMessage("Registro exitoso. Puedes iniciar sesión ahora.");
-                setError("");
+                toast.success("Registro exitoso. Puedes iniciar sesión ahora.");
             }
         } catch (error) {
-            setError(isLogin ? "Hubo un problema al iniciar sesión." : "Hubo un problema al registrar el usuario.");
-            setMessage("");
+            toast.error("se ha producido un error al " + (isLogin ? "iniciar sesión" : "registrar el usuario"));
         }
     };
 
@@ -160,10 +175,8 @@ export default function Form() {
                 <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-blue-500 mt-4">
                     {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
                 </button>
-
-                {message && <p className="text-green-500 mt-4">{message}</p>}
-                {error && <p className="text-red-500 mt-4">{error}</p>}
             </form>
+            <Toaster />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 interface FormData {
   nombreServicio: string;
@@ -14,47 +15,56 @@ export default function Form2() {
     precio: "",
     imagenes: null,
   });
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFormData({
         ...formData,
-        imagenes: e.target.files[0], // Solo la primera imagen
+        imagenes: e.target.files[0], 
       });
     }
   };
 
   const handleSubmitFormProducto = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+
+    // Validations
+    if (!formData.nombreServicio) {
+      toast.error("El nombre del producto es obligatorio.");
+      return;
+    }
+    if (!formData.precio) {
+      toast.error("El precio del producto es obligatorio.");
+      return;
+    }
+    if (!formData.imagenes) {
+      toast.error("La imagen del producto es obligatorio.");
+      return;
+    }
 
     const id = Cookies.get("id") as string;
     const idUsuarioVendedor = parseInt(id, 10);
-    const precio = parseInt(formData.precio, 10); // Convertir precio a entero
+    const precio = parseInt(formData.precio, 10); 
 
-    if (formData.imagenes) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const imagenUrl = reader.result as string; // URL de la imagen
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const imagenUrl = reader.result as string;
 
-        try {
-          const res = await axios.post("/api/producto/registrar", {
-            nombreServicio: formData.nombreServicio,
-            precio, 
-            idUsuarioVendedor,
-            imagenes: imagenUrl, 
-          });
-          setMessage("Producto registrado exitosamente!");
-          console.log(res.data);
-        } catch (error) {
-          console.error('Error en la solicitud:', error);
-          setError("Hubo un problema al registrar el producto.");
-          setMessage("");
-        }
-      };
-      reader.readAsDataURL(formData.imagenes); // Leer como URL base64
-    }
+      try {
+        const res = await axios.post("/api/producto/registrar", {
+          nombreServicio: formData.nombreServicio,
+          precio, 
+          idUsuarioVendedor,
+          imagenes: imagenUrl, 
+        });
+        toast.success("Producto registrado exitosamente!");
+      } catch (error) {
+        console.error('Error en la solicitud:', error);
+        toast.error("Hubo un problema al registrar el producto.");
+      }
+    };
+    reader.readAsDataURL(formData.imagenes); 
   };
 
   return (
@@ -101,9 +111,7 @@ export default function Form2() {
           value="Enviar"
           className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         />
-
-        {message && <p className="text-green-500 mt-2">{message}</p>}
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+        <Toaster />
       </form>
     </div>
   );
