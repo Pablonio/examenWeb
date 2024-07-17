@@ -2,11 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { db } from '../../../lib/lib';
-import corsMiddleware from '../../../middleware/cors';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-
-    await corsMiddleware(req, res);
 
     if (!process.env.JWT_SECRET) {
         return res.status(500).json({ error: 'JWT_SECRET not defined' });

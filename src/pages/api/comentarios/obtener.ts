@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import {db} from "../../../lib/lib";
-import corsMiddleware from '../../../middleware/cors';
 
 interface Usuario {
   id: number;
@@ -26,7 +25,6 @@ interface ProductoComprado {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
-    await corsMiddleware(req, res);
   const { idProductoVender } = req.query;
 
   if (!idProductoVender) {

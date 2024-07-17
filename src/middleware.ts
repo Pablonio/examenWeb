@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { parse } from 'cookie';
 
@@ -12,11 +13,21 @@ const protectedRoutes: ProtectedRoutes = {
 };
 
 export async function middleware(request: NextRequest) {
+  // Set CORS headers
+  const response = NextResponse.next();
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET,HEAD,POST,PUT,DELETE,OPTIONS');
+
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return response;
+  }
+
   const cookieHeader = request.headers.get('cookie');
   const cookies = cookieHeader ? parse(cookieHeader) : {};
   const rol = cookies.rol as Roles;
 
-  if (!rol ) {
+  if (!rol) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -25,7 +36,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

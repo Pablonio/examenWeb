@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '../../../lib/lib';
-import corsMiddleware from '../../../middleware/cors';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-
-    await corsMiddleware(req, res);
 
     if (req.method === 'POST') {
         const { nombreServicio, precio, idUsuarioVendedor, imagenes } = req.body;
