@@ -26,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
 
+            // Aquí se compara la contraseña ingresada con la hasheada en la base de datos
             const passwordMatch = await compare(contrasena, user.contrasena);
 
             if (!passwordMatch) {
