@@ -12,11 +12,22 @@ const protectedRoutes: ProtectedRoutes = {
 };
 
 export async function middleware(request: NextRequest) {
+
+  const response = NextResponse.next();
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+
+  if (request.method === 'OPTIONS') {
+    return response;
+  }
+
   const cookieHeader = request.headers.get('cookie');
   const cookies = cookieHeader ? parse(cookieHeader) : {};
   const rol = cookies.rol as Roles;
 
-  if (!rol ) {
+  if (!rol) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
@@ -25,9 +36,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  matcher: ['/FormularioVendedor/:path*', '/FormularioUsuario/:path*'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
