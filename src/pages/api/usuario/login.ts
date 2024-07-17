@@ -14,11 +14,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { email, contrasena } = req.body;
     
         try {
-          let usuario = await db.usuario.findFirst({
-            where: {
-              OR: [
-                { email: email },
-              ],
+          let usuario = await db.usuario.findUnique({
+            where: { email: email },
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+              numero: true,
+              rol: true,
+              contrasena: true, // Añadimos este campo
             },
           });
     
@@ -55,4 +60,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(405).json({ error: 'Método no permitido' });
       }
 }
-    
