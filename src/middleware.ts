@@ -14,10 +14,9 @@ const protectedRoutes: ProtectedRoutes = {
 export async function middleware(request: NextRequest) {
   const cookieHeader = request.headers.get('cookie');
   const cookies = cookieHeader ? parse(cookieHeader) : {};
-  const token = cookies.token;
   const rol = cookies.rol as Roles;
 
-  if (!rol && !token) {
+  if (!rol ) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
