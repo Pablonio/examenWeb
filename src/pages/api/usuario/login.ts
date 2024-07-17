@@ -20,6 +20,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const user = await db.usuario.findUnique({
                 where: { email },
+                select: { 
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    numero: true,
+                    rol: true,
+                    contrasena: true, 
+                },
             });
 
             if (!user) {
@@ -36,7 +45,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 expiresIn: '1h',
             });
 
-            res.status(200).json({ token, user: { id: user.id, nombre: user.nombre, contrasena: user.contrasena, apellido: user.apellido, email: user.email, numero: user.numero, rol: user.rol } });
+            res.status(200).json({
+                token,
+                user: {
+                    id: user.id,
+                    nombre: user.nombre,
+                    apellido: user.apellido,
+                    email: user.email,
+                    numero: user.numero,
+                    rol: user.rol,
+                },
+            });
         } catch (error) {
             console.error('Login failed:', error);
             res.status(500).json({ error: 'Error en el inicio de sesión' });
