@@ -27,7 +27,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     email: true,
                     numero: true,
                     rol: true,
-                    contrasena: true, 
                 },
             });
 
@@ -35,7 +34,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
 
-            const passwordMatch = await compare(contrasena, user.contrasena);
+            const userWithPassword = await db.usuario.findUnique({
+                where: { email },
+                select: {
+                    contrasena: true,
+                },
+            });
+
+            const passwordMatch = await compare(contrasena, userWithPassword?.contrasena || '');
 
             if (!passwordMatch) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
