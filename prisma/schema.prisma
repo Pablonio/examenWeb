@@ -14,11 +14,11 @@ model Usuario {
   apellido           String
   email              String             @unique
   numero             Int
-  contrasena         String
   rol                String             @default("Usuario")
   Comentarios        Comentario[]
   ProductosComprados ProductoComprado[]
   ProductosVender    ProductoVender[]
+  contrasena         String
 }
 
 model ProductoVender {
