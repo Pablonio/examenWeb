@@ -4,13 +4,13 @@ import bcrypt from 'bcrypt';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
-        const { nombre, apellido, email, numero, rol, password } = req.body;
+        const { nombre, apellido, email, numero, rol, contrasena } = req.body;
 
-        if (!nombre || !apellido || !email || !numero || !rol || !password) {
+        if (!nombre || !apellido || !email || !numero || !rol || !contrasena) {
             return res.status(400).json({ error: 'Todos los campos son obligatorios' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const contrasenaHash = await bcrypt.hash(contrasena, 10);
 
         try {
             const user = await db.usuario.create({
@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     email,
                     numero,
                     rol,
-                    contrasena: hashedPassword,
+                    contrasena: contrasenaHash,
                 },
             });
             return res.status(201).json(user);
