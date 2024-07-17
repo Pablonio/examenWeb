@@ -7,7 +7,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!process.env.JWT_SECRET) {
         return res.status(500).json({ error: 'JWT_SECRET not defined' });
     }
-    
     const JWT_SECRET = process.env.JWT_SECRET;
 
     if (req.method === 'POST') {
