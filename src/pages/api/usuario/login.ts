@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { email, contrasena } = req.body;
     
         try {
-          let user = await db.usuario.findFirst({
+          let usuario = await db.usuario.findFirst({
             where: {
               OR: [
                 { email: email },
@@ -22,29 +22,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             },
           });
     
-          if (!user) {
+          if (!usuario) {
             return res.status(401).json({ error: 'Invalid credentials' });
           }
     
-          const passwordMatch = await compare(contrasena, user.contrasena);
+          const passwordMatch = await compare(contrasena, usuario.contrasena);
     
           if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
           }
     
-          const token = sign({ userId: user.id }, JWT_SECRET, {
+          const token = sign({ userId: usuario.id }, JWT_SECRET, {
             expiresIn: '1h',
           });
     
           res.status(200).json({
             token,
             user: {
-              id: user.id,
-              nombre: user.nombre,
-              apellido: user.apellido,
-              email: user.email,
-              numero: user.numero,
-              rol: user.rol,
+              id: usuario.id,
+              nombre: usuario.nombre,
+              apellido: usuario.apellido,
+              email: usuario.email,
+              numero: usuario.numero,
+              rol: usuario.rol,
             },
           });
         } catch (error) {
