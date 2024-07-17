@@ -20,23 +20,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const user = await db.usuario.findUnique({
                 where: { email },
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    numero: true,
+                    rol: true,
+                    contrasena: true, 
+                },
             });
 
             if (!user) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
-
-            // Aquí se compara la contraseña ingresada con la hasheada en la base de datos
             const passwordMatch = await compare(contrasena, user.contrasena);
 
             if (!passwordMatch) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
-
             const token = sign({ userId: user.id, rol: user.rol }, JWT_SECRET, {
                 expiresIn: '1h',
             });
-
             res.status(200).json({
                 token,
                 user: {
