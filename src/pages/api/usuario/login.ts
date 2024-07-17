@@ -20,28 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const user = await db.usuario.findUnique({
                 where: { email },
-                select: { 
-                    id: true,
-                    nombre: true,
-                    apellido: true,
-                    email: true,
-                    numero: true,
-                    rol: true,
-                },
             });
 
             if (!user) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
             }
 
-            const userWithPassword = await db.usuario.findUnique({
-                where: { email },
-                select: {
-                    contrasena: true,
-                },
-            });
-
-            const passwordMatch = await compare(contrasena, userWithPassword?.contrasena || '');
+            const passwordMatch = await compare(contrasena, user.contrasena);
 
             if (!passwordMatch) {
                 return res.status(401).json({ error: 'Credenciales inválidas' });
