@@ -2,16 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { db } from '../../../lib/lib';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
-interface Usuario {
-    id: number;
-    nombre: string;
-    apellido: string;
-    email: string;
-    numero: number;
-    rol: string;
-    contrasena: string;
-}
+import { Usuario } from '@prisma/client'; // Import the Prisma types
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
@@ -31,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     email: true,
                     numero: true,
                     rol: true,
-                    contrasena: true,
+                    contrasena: true, // Include contrasena
                 },
             });
 
